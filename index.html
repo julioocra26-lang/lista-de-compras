@@ -3,113 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <title>Lista De Compras Cemitas Los Compas</title>
-  <!-- Librerías para PDF y Excel -->
+  <!-- Librerías para PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #ffecd2, #fcb69f);
-      color: #333;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: linear-gradient(135deg, #fff7e6, #ffe6cc);
     }
-    header {
+    h2 {
       text-align: center;
-      padding: 20px;
-      background: #ff7043;
+      font-size: 2em;
+      padding: 15px;
+      background: #ff9800;
       color: white;
-      border-bottom: 5px solid #d84315;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border-radius: 15px;
+      border: 4px solid #e65100;
+      display: inline-block;
+      margin: 20px auto;
+      box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
     }
-    header h2 {
-      font-size: 28px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
+    h2 i {
+      margin-right: 10px;
     }
-    header h2 i {
-      color: #fff;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
     }
-
-    .botones {
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+      font-size: 1em;
+    }
+    th {
+      background: #ffcc80;
+    }
+    .faltante {
+      background-color: #ffdddd !important;
+    }
+    .btn-container {
       text-align: center;
       margin: 20px 0;
     }
-    .botones button {
-      margin: 10px 8px;
-      padding: 14px 22px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
+    button {
+      margin: 10px;
+      padding: 18px 28px;
       cursor: pointer;
-      transition: 0.3s;
-      color: white;
-      font-weight: bold;
-    }
-    .botones button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-    .btn-marcar { background: #43a047; }
-    .btn-desmarcar { background: #e53935; }
-    .btn-pdf { background: #3949ab; }
-    .btn-excel { background: #2e7d32; }
-
-    table {
-      width: 95%;
-      margin: 0 auto 30px;
-      border-collapse: collapse;
-      background: white;
+      border: none;
       border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-      font-size: 16px;
-    }
-    th {
-      background: #ff7043;
+      font-size: 1.2em;
+      font-weight: bold;
       color: white;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    tr:nth-child(even) {
-      background: #f9f9f9;
+    button i {
+      font-size: 1.3em;
     }
-    .faltante {
-      background-color: #ffcccc !important;
+    .btn-marcar {
+      background: #4caf50;
     }
-
-    /* Responsivo para móviles */
+    .btn-marcar:hover {
+      background: #388e3c;
+    }
+    .btn-desmarcar {
+      background: #f44336;
+    }
+    .btn-desmarcar:hover {
+      background: #c62828;
+    }
+    .btn-pdf {
+      background: #2196f3;
+    }
+    .btn-pdf:hover {
+      background: #1565c0;
+    }
     @media (max-width: 600px) {
-      header h2 {
-        font-size: 20px;
-      }
-      .botones button {
+      button {
         width: 90%;
-        margin: 8px 0;
-        font-size: 18px;
-      }
-      table {
-        font-size: 14px;
+        font-size: 1.1em;
+        padding: 16px;
       }
     }
   </style>
 </head>
 <body>
-  <header>
+  <center>
     <h2><i class="fas fa-shopping-cart"></i> Lista De Compras Cemitas Los Compas</h2>
-  </header>
+  </center>
   
-  <div class="botones">
+  <div class="btn-container">
     <button class="btn-marcar" onclick="marcarTodos()"><i class="fas fa-check-square"></i> Marcar todos</button>
-    <button class="btn-desmarcar" onclick="desmarcarTodos()"><i class="fas fa-times-circle"></i> Desmarcar todos</button>
+    <button class="btn-desmarcar" onclick="desmarcarTodos()"><i class="fas fa-square"></i> Desmarcar todos</button>
     <button class="btn-pdf" onclick="descargarPDF()"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
-    <button class="btn-excel" onclick="descargarExcel()"><i class="fas fa-file-excel"></i> Descargar Excel</button>
   </div>
   
   <table>
@@ -209,15 +206,17 @@
           faltantes.push(producto);
         }
       });
-      return faltantes;
+      return faltantes.sort();
     }
 
+    // Descargar PDF
     function descargarPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       let faltantes = obtenerFaltantes();
       doc.setFontSize(16);
-      doc.text("Lista de Compras Cemitas Los Compas", 20, 20);
+      doc.text("Lista De Compras Cemitas Los Compas", 20, 20);
+      doc.setFontSize(12);
       if (faltantes.length === 0) {
         doc.text("✅ Todo está completo, no faltan productos.", 20, 30);
       } else {
@@ -228,16 +227,13 @@
       doc.save("lista_compras.pdf");
     }
 
-    function descargarExcel() {
-      let faltantes = obtenerFaltantes().map(item => ({ Producto: item }));
-      if (faltantes.length === 0) {
-        faltantes = [{ Producto: "Todo completo ✅" }];
-      }
-      let hoja = XLSX.utils.json_to_sheet(faltantes);
-      let libro = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(libro, hoja, "Compras");
-      XLSX.writeFile(libro, "lista_compras.xlsx");
-    }
+    // Ordenar tabla alfabéticamente al cargar
+    window.onload = function() {
+      let lista = document.querySelector("#lista");
+      let filas = Array.from(lista.querySelectorAll("tr"));
+      filas.sort((a, b) => a.cells[0].innerText.localeCompare(b.cells[0].innerText));
+      filas.forEach(fila => lista.appendChild(fila));
+    };
   </script>
 </body>
 </html>
