@@ -1,19 +1,165 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Lista De Compras</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/><style>body{font-family:sans-serif;margin:20px;padding:0 10px;text-align:center}.particles{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;background:linear-gradient(135deg,#ffa726,#fb8c00);overflow:hidden}.particle{position:absolute;width:12px;height:12px;background:rgba(0,0,0,.3);border-radius:50%;animation:float 20s linear infinite}@keyframes float{0%{transform:translate(0,0)}100%{transform:translate(var(--dx),var(--dy))}}h2{font-size:2.5em;background:#ff9800;color:#fff;border:4px solid #e65100;border-radius:15px;padding:20px 30px;margin:30px auto;display:inline-block;animation:tilt 3s ease-in-out infinite alternate}@keyframes tilt{0%{transform:rotate(-2deg) scale(1)}100%{transform:rotate(2deg) scale(1.05)}}.btn-container,#add-box{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:20px 0}button{padding:14px 22px;font-weight:bold;border:none;border-radius:12px;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s}button:hover{transform:scale(1.1);box-shadow:0 4px 10px rgba(0,0,0,.2)}.btn-marcar{background:#4caf50}.btn-desmarcar{background:#f44336}.btn-pdf{background:#2196f3}.btn-share{background:#9c27b0}input[type=checkbox]{appearance:none;width:25px;height:25px;border:2px solid #888;border-radius:5px;background:#fff;cursor:pointer;position:relative}input[type=checkbox]:checked{background:#4caf50;border-color:#4caf50}input[type=checkbox]::after{content:"";position:absolute;top:4px;left:8px;width:6px;height:12px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);opacity:1}#newItem{padding:8px;width:200px;font-size:1em;border-radius:8px;border:1px solid #ccc}@media(max-width:600px){button,#newItem{width:100%}}table{width:100%;border-collapse:collapse;margin-top:20px;background:#fff;border-radius:10px;box-shadow:2px 2px 8px rgba(0,0,0,.2);text-align:left}th,td{border:1px solid #ccc;padding:10px}th{background:#ffcc80}.faltante{background-color:#ffdddd!important}</style></head><body><div class="particles"></div><h2><i class="fas fa-shopping-cart"></i> Lista De Compras</h2><div class="btn-container"><button class="btn-marcar" onclick="cambiarTodos(1)"><i class="fas fa-check-square"></i> Marcar todos</button><button class="btn-desmarcar" onclick="cambiarTodos(0)"><i class="fas fa-square"></i> Desmarcar todos</button><button class="btn-pdf" onclick="descargarPDF()"><i class="fas fa-file-pdf"></i> PDF</button><button class="btn-share" onclick="compartir()"><i class="fas fa-share-alt"></i> Compartir</button></div><div id="add-box"><input type="text" id="newItem" placeholder="Nuevo producto..."><button class="btn-marcar" onclick="agregarProducto()">Agregar</button></div><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Falta?</th></tr></thead><tbody id="lista"></tbody></table><script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inventario de Compras</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    margin: 20px;
+    padding: 0 10px;
+    text-align: center;
+    background: #fff8e1;
+  }
+  .particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+    background: linear-gradient(135deg, #ffa726, #fb8c00); overflow: hidden; }
+  .particle { position: absolute; width: 12px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 50%;
+    animation: float 20s linear infinite; }
+  @keyframes float { 0%{transform:translate(0,0);} 100%{transform:translate(var(--dx),var(--dy));} }
+  h2 { font-size: 2em; background:#ff9800; color:#fff; border:3px solid #e65100; border-radius:12px;
+    padding:15px 25px; margin:20px auto; display:inline-block; }
+  .btn-container,#add-box{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:15px 0; }
+  button{ padding:12px 18px; font-weight:bold; border:none; border-radius:10px; color:#fff; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; transition:0.2s; font-size:1em; }
+  button:hover{ transform:scale(1.05); }
+  .btn-marcar{ background:#4caf50;} .btn-desmarcar{background:#f44336;} .btn-share{background:#9c27b0;}
+  input[type="checkbox"]{ appearance:none; width:22px; height:22px; border:2px solid #888; border-radius:5px;
+    background:#fff; cursor:pointer; position:relative; }
+  input[type="checkbox"]:checked{ background:#4caf50; border-color:#4caf50;}
+  input[type="checkbox"]::after{ content:""; position:absolute; top:3px; left:7px; width:5px; height:10px;
+    border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg);}
+  #newItem{ padding:8px; width:200px; font-size:1em; border-radius:8px; border:1px solid #ccc;}
+  select.cantidad-select{ width:80px; font-size:1em; padding:4px 6px; border-radius:6px; border:1px solid #ccc;
+    text-align-last:center; cursor:pointer; }
+  @media(max-width:600px){ button,#newItem,select.cantidad-select{width:100%;} table{font-size:0.9em;} }
+  .tabla-wrapper{ width:100%; overflow-x:auto;}
+  table{ width:100%; border-collapse:collapse; margin-top:15px; background:#fff; border-radius:10px;
+    box-shadow:2px 2px 8px rgba(0,0,0,0.2); text-align:left; min-width:600px;}
+  th,td{ border:1px solid #ccc; padding:8px; vertical-align:middle;}
+  th{ background:#ffcc80;}
+  .faltante{ background-color:#ffdddd!important;}
+  td.unidad{ font-weight:bold; text-align:center; white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="particles"></div>
+<h2><i class="fas fa-clipboard-list"></i> Inventario de Compras</h2>
+
+<div class="btn-container">
+  <button class="btn-marcar" onclick="cambiarTodos(1)"><i class="fas fa-check-square"></i> Marcar todos</button>
+  <button class="btn-desmarcar" onclick="cambiarTodos(0)"><i class="fas fa-square"></i> Desmarcar todos</button>
+  <button class="btn-share" onclick="compartir()"><i class="fas fa-share-alt"></i> Compartir</button>
+</div>
+
+<div id="add-box">
+  <input type="text" id="newItem" placeholder="Nuevo producto..." />
+  <button class="btn-marcar" onclick="agregarProducto()">Agregar</button>
+</div>
+
+<div class="tabla-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad actual</th>
+      <th>Cantidad que falta</th>
+      <th>Unidad</th>
+      <th>Falta?</th>
+    </tr>
+  </thead>
+  <tbody id="lista"></tbody>
+</table>
+</div>
+
+<script>
 const lista=document.getElementById("lista"),LS_KEY="lista_compra";
-// Esta línea borra el almacenamiento guardado antes. Elimínala después de probar.
-localStorage.removeItem(LS_KEY);
 
-const productos=["Pan","Alfalfa","Aceite","Papa","Aguacate","Bolsa asa","Bolsa de 30 x 40","Bolsa de papel","Bolsa de 15 x 25","Sal","Chipotle","Rajas","Pata","Huevos","Leche","Polvos","Quesillo","Queso","Desengrasante","Jabón","Jabón para manos","Gel antibacterial","Aceite de oliva","Vasos de medio litro","Vasos de litro","Tapas de medio","Papas a la francesa","Pan molido","Carne","Pollo","Cebolla","Salchicha","Jamón","Pápalo","Limón","Carnation","Azúcar","Vainilla","Enchilada","Servilletas","Trapos","Guantes","Refrescos de sabor","Refrescos de 2 litros","Pelapapas","Fibra de metal","Flan","Carlota de limón","Catsup","Salsa","Cucharas de plástico","Agua simple para las de sabor","Agua simple para beber"].sort();
+const opcionesCantidades=[0.25,0.5,1,1.5,2,3,4,5,6,7,8,9,10,15,20,25,30,40,50];
 
-const guardar=_=>localStorage.setItem(LS_KEY,JSON.stringify([...lista.rows].map(r=>[r.cells[0].innerText,r.cells[1].querySelector("input").value,r.cells[2].querySelector("input").checked])));
-const cargar=_=>{let data=JSON.parse(localStorage.getItem(LS_KEY)||"[]");data.forEach(([n,c,f])=>{let r=[...lista.rows].find(x=>x.cells[0].innerText===n);if(r){r.cells[1].querySelector("input").value=c;r.cells[2].querySelector("input").checked=f;r.classList.toggle("faltante",f);}});};
-const toggleFila=c=>{let r=c.closest("tr");r.classList.toggle("faltante",c.checked);guardar();};
-const cambiarTodos=v=>lista.querySelectorAll("input[type=checkbox]").forEach(c=>{c.checked=!!v;toggleFila(c);});
-const obtenerFaltantes=_=>[...lista.rows].filter(r=>r.cells[2].querySelector("input").checked).map(r=>`${r.cells[0].innerText} (${r.cells[1].querySelector("input").value})`);
-const descargarPDF=_=>{const{jsPDF}=window.jspdf,doc=new jsPDF(),f=obtenerFaltantes();doc.setFontSize(16).text("Lista De Compras",20,20);doc.setFontSize(12);f.length?f.forEach((x,i)=>doc.text("- "+x,20,30+i*10)):doc.text("✅ Todo completo.",20,30);doc.save("lista_compras.pdf");};
-const compartir=_=>{let t=obtenerFaltantes(),msg=t.length?`🛒 Faltan:\n- ${t.join("\n- ")}`:"✅ Todo está completo.";window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");};
-const crearFila=(n,c="0",f=false)=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${n}</td><td><input type="number" step="0.01" min="0" value="${c}" onchange="guardar()"></td><td><input type="checkbox"${f?" checked":""} onchange="toggleFila(this)"></td>`;if(f)tr.classList.add("faltante");lista.appendChild(tr);};
-const agregarProducto=_=>{let n=document.getElementById("newItem").value.trim();if(n&&!([...lista.rows].some(r=>r.cells[0].innerText===n)))crearFila(n,"0"),guardar();document.getElementById("newItem").value="";}
-productos.forEach(p=>crearFila(p,"0"));cargar();
-for(let i=0;i<100;i++){let p=document.createElement('div');p.className='particle';p.style.top=Math.random()*100+'%';p.style.left=Math.random()*100+'%';p.style.setProperty('--dx',(Math.random()*200-100)+'vw');p.style.setProperty('--dy',(Math.random()*200-100)+'vh');document.querySelector('.particles').appendChild(p);}
-</script></body></html>
+const productos={
+ "Aceite":"litros","Aguacate":"kg","Azúcar":"kg","Carne":"kg","Cebolla":"kg","Huevos":"kg","Jamón":"kg",
+ "Leche":"litros","Limón":"kg","Pan":"piezas","Papa":"kg","Pollo":"kg","Queso":"piezas","Sal":"kg",
+ "Aceite de oliva":"piezas","Agua simple para beber":"piezas","Agua simple para aguas de sabor":"piezas",
+ "Alfalfa":"piezas","Bolsa de asa":"piezas","Bolsa de 15 x 25":"piezas","Bolsa de 30 x 40":"piezas",
+ "Bolsa de papel":"piezas","Carlota de limón":"piezas","Flan":"piezas","Carnation":"piezas",
+ "Chipotle":"kg","Desengrasante":"unidad","Enchilada":"kg","Fibra de metal":"unidad",
+ "Gel antibacterial":"unidad","Jabón para manos":"unidad","Guantes":"unidad","Jabón para trastes":"unidad",
+ "Pan molido":"kg","Papas a la francesa":"kg","Pata":"kg","Pelapapas":"unidad","Polvos":"kg","Pápalo":"piezas",
+ "Quesillo":"kg","Salchicha":"kg","Servilletas":"piezas","Tapas de vaso de medio":"piezas",
+ "Tapas de vaso de litro":"piezas","Trapos":"unidad","Vainilla":"piezas","Vasos de medio":"piezas",
+ "Vaso de litro":"piezas"
+};
+
+function crearOpcionesSeleccionadas(v){return opcionesCantidades.map(num=>`<option value="${num}" ${num==parseFloat(v)?"selected":""}>${num}</option>`).join("");}
+
+function crearFila(nombre,cA="0",cF="0",falta=false){
+ const unidad=productos[nombre]||"piezas";
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td>${nombre}</td>
+   <td><select class="cantidad-select" onchange="guardar()">${crearOpcionesSeleccionadas(cA)}</select></td>
+   <td><select class="cantidad-select" onchange="guardar()">${crearOpcionesSeleccionadas(cF)}</select></td>
+   <td class="unidad">${unidad}</td>
+   <td><input type="checkbox" ${falta?"checked":""} onchange="toggleFila(this)"></td>`;
+ if(falta) tr.classList.add("faltante");
+ lista.appendChild(tr);
+}
+
+function guardar(){
+ const datos=[...lista.rows].map(f=>[f.cells[0].innerText,f.cells[1].querySelector("select").value,f.cells[2].querySelector("select").value,f.cells[4].querySelector("input").checked]);
+ localStorage.setItem(LS_KEY,JSON.stringify(datos));
+}
+function cargar(){
+ const datos=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
+ datos.forEach(([n,cA,cF,f])=>{
+  const fila=[...lista.rows].find(fl=>fl.cells[0].innerText===n);
+  if(fila){fila.cells[1].querySelector("select").value=cA; fila.cells[2].querySelector("select").value=cF; fila.cells[4].querySelector("input").checked=f; fila.classList.toggle("faltante",f);}
+ });
+}
+function toggleFila(cb){cb.closest("tr").classList.toggle("faltante",cb.checked); guardar();}
+function cambiarTodos(v){lista.querySelectorAll("input[type=checkbox]").forEach(cb=>{cb.checked=!!v; cb.dispatchEvent(new Event("change"));});}
+
+function obtenerInventario(){
+ return [...lista.rows].map(f=>`${f.cells[0].innerText} → ${f.cells[1].querySelector("select").value} ${f.cells[3].innerText}`);
+}
+function obtenerFaltantes(){
+ return [...lista.rows].filter(f=>f.cells[4].querySelector("input").checked)
+ .map(f=>`${f.cells[0].innerText} → ${f.cells[2].querySelector("select").value} ${f.cells[3].innerText}`);
+}
+function compartir(){
+ const inventario=obtenerInventario();
+ const faltantes=obtenerFaltantes();
+
+ let mensaje="📋 *Inventario Completo:*\n";
+ mensaje+=inventario.map(p=>`- ${p}`).join("\n");
+
+ if(faltantes.length){
+   mensaje+="\n\n🛒 *Productos que faltan:*\n";
+   mensaje+=faltantes.map(p=>`- ${p}`).join("\n");
+ } else {
+   mensaje+="\n\n✅ No falta nada.";
+ }
+
+ window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`,"_blank");
+}
+
+function agregarProducto(){
+ const n=document.getElementById("newItem").value.trim();
+ if(!n) return alert("Escribe un producto");
+ if([...lista.rows].some(f=>f.cells[0].innerText.toLowerCase()===n.toLowerCase())) return alert("Ya existe en la lista");
+ productos[n]=productos[n]||"piezas"; crearFila(n,"0","0",false); guardar(); document.getElementById("newItem").value="";
+}
+
+Object.keys(productos).sort((a,b)=>a.localeCompare(b,"es")).forEach(p=>crearFila(p,"0","0",false));
+cargar();
+
+for(let i=0;i<80;i++){const p=document.createElement("div");p.className="particle";
+p.style.top=Math.random()*100+"%";p.style.left=Math.random()*100+"%";
+p.style.setProperty("--dx",Math.random()*200-100+"vw");
+p.style.setProperty("--dy",Math.random()*200-100+"vh");
+document.querySelector(".particles").appendChild(p);}
+</script>
+</body>
+</html>
